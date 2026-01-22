@@ -14,12 +14,20 @@ except:
     api_key = st.sidebar.text_input("Google API Key", type="password")
 
 # --- 入力エリア ---
-theme = st.text_input("討論のテーマ", "好きなファーストフード店")
+input_theme = st.text_input("討論のテーマ", placeholder="例：好きなファーストフード店")
 col1, col2 = st.columns(2)
 with col1:
-    stance_a = st.text_input("霊夢の立場", "マクドナルド派")
+    input_a = st.text_input("霊夢の立場", placeholder="例：マクドナルド派")
 with col2:
-    stance_b = st.text_input("魔理沙の立場", "ケンタッキー派")
+    input_b = st.text_input("魔理沙の立場", placeholder="例：ケンタッキー派")
+
+# --- 自動補完 ---
+theme = input_theme if input_theme else "好きなファーストフード店"
+stance_a = input_a if input_a else "マクドナルド派"
+stance_b = input_b if input_b else "ケンタッキー派"
+
+if not input_theme:
+    st.caption(f"※入力がないため、例の「{theme}」で実行するぜ！")
 
 # --- ボタンが押されたら実行 ---
 if st.button("討論スタート！🔥"):
@@ -56,13 +64,11 @@ if st.button("討論スタート！🔥"):
             5. 最後に会話の内容を踏まえた「まとめ」を出してください。
             """
 
-            with st.spinner("二人が会議中..."):
+            with st.spinner("二人がお話し中..."):
                 response = model.generate_content(prompt)
                 
-                # --- 👇 ここが重要！チャット風にする処理 ---
                 st.markdown("---")
 
-                # AIの返事を「改行」で区切って、一行ずつチェックするループ
                 lines = response.text.split('\n')
 
                 for line in lines:
@@ -79,7 +85,6 @@ if st.button("討論スタート！🔥"):
                             st.write(clean_text)
                             
                     else:
-                        # セリフ以外の行（まとめなど）は普通に表示
                         if line: 
                             st.write(line)
 
