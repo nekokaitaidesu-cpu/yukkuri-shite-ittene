@@ -74,7 +74,7 @@ if start_button:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-2.0-flash') 
 
-           prompt = f"""
+            prompt = f"""
             以下の設定で、二人のキャラクター（ゆっくり霊夢とゆっくり魔理沙）による会話劇と、そのまとめを作成してください。スタート時、すぐに霊夢の発言から始めてください。
             【テーマ】: {theme}
             【霊夢の立場】: {stance_a}
