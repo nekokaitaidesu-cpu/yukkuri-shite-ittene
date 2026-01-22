@@ -28,7 +28,7 @@ if st.button("討論スタート！🔥"):
     else:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-2.5-flash-lite') 
+            model = genai.GenerativeModel('gemini-2.0-flash') 
 
             prompt = f"""
             以下の設定で、二人のキャラクター（ゆっくり霊夢とゆっくり魔理沙）による会話劇と、そのまとめを作成してください。
@@ -59,31 +59,31 @@ if st.button("討論スタート！🔥"):
             with st.spinner("二人が会議中..."):
                 response = model.generate_content(prompt)
                 
-                # --- 🛠 ここが改造ポイント！ ---
-                # 文章を「行」ごとにバラバラにして、誰のセリフか判断して表示するっち
-                lines = response.text.split('\n')
-                
+                # --- 👇 ここが重要！チャット風にする処理 ---
                 st.markdown("---")
+
+                # AIの返事を「改行」で区切って、一行ずつチェックするループ
+                lines = response.text.split('\n')
 
                 for line in lines:
                     line = line.strip() # 余計な空白を削除
                     
                     if line.startswith("霊夢") or line.startswith("霊夢:"):
-                        # 霊夢のターン！🎀（userアイコンを使うか、絵文字を使う）
+                        # 🎀 霊夢の吹き出しを作る
                         with st.chat_message("霊夢", avatar="🎀"):
-                            # "霊夢:" という文字を消して、セリフだけ表示
+                            # "霊夢:" という名前を消してセリフだけ表示
                             clean_text = line.replace("霊夢:", "").replace("霊夢：", "")
                             st.write(clean_text)
                             
                     elif line.startswith("魔理沙") or line.startswith("魔理沙:"):
-                        # 魔理沙のターン！⭐️
+                        # ⭐️ 魔理沙の吹き出しを作る
                         with st.chat_message("魔理沙", avatar="⭐️"):
                             clean_text = line.replace("魔理沙:", "").replace("魔理沙：", "")
                             st.write(clean_text)
                             
                     else:
-                        # セリフ以外の「まとめ」などは普通に表示
-                        if line: # 空行じゃなければ
+                        # セリフ以外の行（まとめなど）は普通に表示
+                        if line: 
                             st.write(line)
 
                 st.success("☕討論終了☕")
