@@ -1,7 +1,5 @@
 import streamlit as st
 import google.generativeai as genai
-import os
-import re
 
 # ページの設定
 st.set_page_config(page_title=" ゆっくり討論メーカー", page_icon="⛩")
@@ -13,7 +11,6 @@ st.write("テーマと二人の立場を入れると、ゆっくりAI同士が�
 try:
     api_key = st.secrets["GOOGLE_API_KEY"]
 except:
-    # 自分のPCでテストする時用などに、画面から入力もできるようにしておく
     api_key = st.sidebar.text_input("Google API Key", type="password")
 
 # --- 入力エリア ---
@@ -31,8 +28,7 @@ if st.button("討論スタート！🔥"):
     else:
         try:
             genai.configure(api_key=api_key)
-            # ※モデル名は現在使えるもの（gemini-2.0-flashなど）に設定するっち
-            model = genai.GenerativeModel('gemini-2.0-flash') 
+            model = genai.GenerativeModel('gemini-2.5-flash-lite') 
 
             prompt = f"""
             以下の設定で、二人のキャラクター（ゆっくり霊夢とゆっくり魔理沙）による会話劇と、そのまとめを作成してください。
@@ -62,24 +58,34 @@ if st.button("討論スタート！🔥"):
 
             with st.spinner("二人が会議中..."):
                 response = model.generate_content(prompt)
-                original_text = response.text
-
-                # 霊夢の行を赤くする（太字＋赤色）
-                colored_text = re.sub(
-                    r"(霊夢.*)", 
-                    r'<span style="color:#FF2E63; font-weight:bold; font-size:1.1em;">\1</span>', 
-                    original_text
-                )
-
-                # 魔理沙の行を黄金色にする（太字＋濃い黄色）
-                colored_text = re.sub(
-                    r"(魔理沙.*)", 
-                    r'<span style="color:#DAA520; font-weight:bold; font-size:1.1em;">\1</span>', 
-                    colored_text
-                )
-
+                
+                # --- 🛠 ここが改造ポイント！ ---
+                # 文章を「行」ごとにバラバラにして、誰のセリフか判断して表示するっち
+                lines = response.text.split('\n')
+                
                 st.markdown("---")
-                st.markdown(colored_text, unsafe_allow_html=True)
+
+                for line in lines:
+                    line = line.strip() # 余計な空白を削除
+                    
+                    if line.startswith("霊夢") or line.startswith("霊夢:"):
+                        # 霊夢のターン！🎀（userアイコンを使うか、絵文字を使う）
+                        with st.chat_message("霊夢", avatar="🎀"):
+                            # "霊夢:" という文字を消して、セリフだけ表示
+                            clean_text = line.replace("霊夢:", "").replace("霊夢：", "")
+                            st.write(clean_text)
+                            
+                    elif line.startswith("魔理沙") or line.startswith("魔理沙:"):
+                        # 魔理沙のターン！⭐️
+                        with st.chat_message("魔理沙", avatar="⭐️"):
+                            clean_text = line.replace("魔理沙:", "").replace("魔理沙：", "")
+                            st.write(clean_text)
+                            
+                    else:
+                        # セリフ以外の「まとめ」などは普通に表示
+                        if line: # 空行じゃなければ
+                            st.write(line)
+
                 st.success("☕討論終了☕")
 
         except Exception as e:
