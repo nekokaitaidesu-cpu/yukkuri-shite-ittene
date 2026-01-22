@@ -4,7 +4,18 @@ import google.generativeai as genai
 # ページの設定
 st.set_page_config(page_title=" ゆっくり討論メーカー", page_icon="⛩")
 
-st.title("🎀 ゆっくりAI討論メーカー ⭐️")
+st.markdown("""
+    <style>
+    .title-text {
+        font-size: 24px !important;  /* 文字の大きさ（小さくして1行に！） */
+        font-weight: bold;
+        text-align: center;          /* 真ん中寄せ */
+        margin-bottom: 20px;
+    }
+    </style>
+    <div class="title-text">🔴 ゆっくりAI討論メーカー ⭐️</div>
+    """, unsafe_allow_html=True)
+
 st.write("テーマと二人の立場を入れると、ゆっくりAI同士が勝手に議論します！")
 
 # --- APIキーの設定 ---
@@ -13,38 +24,63 @@ try:
 except:
     api_key = st.sidebar.text_input("Google API Key", type="password")
 
+if "input_theme" not in st.session_state:
+    st.session_state["input_theme"] = ""
+if "input_a" not in st.session_state:
+    st.session_state["input_a"] = ""
+if "input_b" not in st.session_state:
+    st.session_state["input_b"] = ""
+
+# リセットボタンが押された時の関数（中身を空っぽにする）
+def clear_text():
+    st.session_state["input_theme"] = ""
+    st.session_state["input_a"] = ""
+    st.session_state["input_b"] = ""
+
 # --- 入力エリア ---
-input_theme = st.text_input("討論のテーマ", placeholder="例：好きなファーストフード店")
+input_theme = st.text_input("討論のテーマ", placeholder="例：好きなファーストフード店", key="input_theme")
+
 col1, col2 = st.columns(2)
 with col1:
-    input_a = st.text_input("霊夢の立場", placeholder="例：マクドナルド派")
+    input_a = st.text_input("霊夢の立場", placeholder="例：マクドナルド派", key="input_a")
 with col2:
-    input_b = st.text_input("魔理沙の立場", placeholder="例：ケンタッキー派")
+    input_b = st.text_input("魔理沙の立場", placeholder="例：ケンタッキー派", key="input_b")
 
-# --- 自動補完 ---
+# 値の決定（空っぽなら例を使う）
 theme = input_theme if input_theme else "好きなファーストフード店"
 stance_a = input_a if input_a else "マクドナルド派"
 stance_b = input_b if input_b else "ケンタッキー派"
 
-if not input_theme:
-    st.caption(f"※入力がないため、例の「{theme}」で実行するぜ！")
+btn_col1, btn_col2 = st.columns([1, 3]) 
 
-# --- ボタンが押されたら実行 ---
-if st.button("討論スタート！🔥"):
+with btn_col1:
+    # 🔄 リセットボタン（押すと clear_text が動く）
+    st.button("クリア 🗑️", on_click=clear_text)
+
+with btn_col2:
+    # 🔥 スタートボタン
+    start_button = st.button("討論スタート！🔥", use_container_width=True) # 幅いっぱいに広げるオプション
+
+# --- 実行処理 ---
+if start_button:
     if not api_key:
         st.error("⚠️ APIキーが設定されていないぜ！")
     else:
+        # 入力がない場合の案内メッセージ
+        if not input_theme:
+            st.caption(f"※入力がないため、例の「{theme}」で実行するぜ！")
+
         try:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-2.0-flash') 
 
-            prompt = f"""
-            以下の設定で、二人のキャラクター（ゆっくり霊夢とゆっくり魔理沙）による会話と、そのまとめを作成してください。スタートしたらすぐに霊夢の発言から始めてください。
+           prompt = f"""
+            以下の設定で、二人のキャラクター（ゆっくり霊夢とゆっくり魔理沙）による会話劇と、そのまとめを作成してください。スタート時、すぐに霊夢の発言から始めてください。
             【テーマ】: {theme}
             【霊夢の立場】: {stance_a}
             【魔理沙の立場】: {stance_b}
             【条件】
-            1. 霊夢と魔理沙が交互に3回ずつ発言してください。最後は霊夢が4回目の発言をします。（計7回）
+            1. 霊夢と魔理沙が交互に2回ずつ発言してください。（計4回）
             2. ユーモアや「ゆっくり解説」特有の掛け合いを入れて、より具体的に討論してください。
             3. Aは「霊夢」。
                - 語尾は「～だよ」「～だね」「～かしら」「～のよ」など、カジュアルで女性らしい口調で話すものの、丁寧さも感じられるため、親しみやすく感じる。
@@ -64,15 +100,14 @@ if st.button("討論スタート！🔥"):
             5. 最後に会話の内容を踏まえた「まとめ」を出してください。
             """
 
-            with st.spinner("二人がお話し中..."):
+            with st.spinner("二人が会議中..."):
                 response = model.generate_content(prompt)
                 
                 st.markdown("---")
 
                 lines = response.text.split('\n')
-
                 for line in lines:
-                    line = line.strip() # 余計な空白を削除
+                    line = line.strip()
                     
                     if line.startswith("霊夢:") or line.startswith("霊夢："):
                         with st.chat_message("霊夢", avatar="🎀"):
