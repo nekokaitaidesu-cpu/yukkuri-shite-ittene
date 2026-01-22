@@ -31,7 +31,8 @@ if st.button("討論スタート！🔥"):
     else:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-2.5-flash-lite') 
+            # ※モデル名は現在使えるもの（gemini-2.0-flashなど）に設定するっち
+            model = genai.GenerativeModel('gemini-2.0-flash') 
 
             prompt = f"""
             以下の設定で、二人のキャラクター（ゆっくり霊夢とゆっくり魔理沙）による会話劇と、そのまとめを作成してください。
@@ -59,11 +60,11 @@ if st.button("討論スタート！🔥"):
             5. 最後に会話の内容を踏まえた「まとめ」を出してください。
             """
 
-           with st.spinner("二人が会議中..."):
+            with st.spinner("二人が会議中..."):
                 response = model.generate_content(prompt)
                 original_text = response.text
 
-                # 霊夢...で始まる行を見つけて、HTMLのタグで囲む処理
+                # 霊夢の行を赤くする（太字＋赤色）
                 colored_text = re.sub(
                     r"(霊夢.*)", 
                     r'<span style="color:#FF2E63; font-weight:bold; font-size:1.1em;">\1</span>', 
