@@ -68,15 +68,12 @@ if st.button("討論スタート！🔥"):
                 for line in lines:
                     line = line.strip() # 余計な空白を削除
                     
-                    if line.startswith("霊夢") or line.startswith("霊夢:"):
-                        # 🎀 霊夢の吹き出しを作る
+                    if line.startswith("霊夢:") or line.startswith("霊夢："):
                         with st.chat_message("霊夢", avatar="🎀"):
-                            # "霊夢:" という名前を消してセリフだけ表示
                             clean_text = line.replace("霊夢:", "").replace("霊夢：", "")
                             st.write(clean_text)
                             
-                    elif line.startswith("魔理沙") or line.startswith("魔理沙:"):
-                        # ⭐️ 魔理沙の吹き出しを作る
+                    elif line.startswith("魔理沙:") or line.startswith("魔理沙："):
                         with st.chat_message("魔理沙", avatar="⭐️"):
                             clean_text = line.replace("魔理沙:", "").replace("魔理沙：", "")
                             st.write(clean_text)
