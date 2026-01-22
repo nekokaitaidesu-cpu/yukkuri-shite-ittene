@@ -4,7 +4,8 @@ import google.generativeai as genai
 # ページの設定
 st.set_page_config(page_title=" ゆっくり討論メーカー", page_icon="⛩")
 
-st.title("🎀 ゆっくりAI討論メーカー ⭐️")
+st.title("🎀 ゆっくりAI 🎀")
+at.title("⭐ 討論メーカー ⭐️")
 st.write("テーマと二人の立場を入れると、ゆっくりAI同士が勝手に議論します！")
 
 # --- APIキーの設定 ---
