@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 import os
+import re
 
 # ページの設定
 st.set_page_config(page_title=" ゆっくり討論メーカー", page_icon="⛩")
@@ -47,19 +48,37 @@ if st.button("討論スタート！🔥"):
                - 相手が話すことに専念することで、コミュニケーションを円滑に進める役割を担っている。
                - 最初の一言目は「ねぇ、魔理沙」・・・
                - 「なんだよ」→「なのよ」
+               - 文頭には必ず「霊夢:」とつけてください。
             4. Bは「魔理沙」。
                - 語尾は「～だぜ」「～なのか？」「～ぜ」など。くどいくらいに、語尾に「ぜ」をつける。時折、「なのぜ」も使うことがあることから、独特の言い回しで個性を表現している。
                - ややくだけた口調で、若々しく活発な印象を与える。
                - 一人称は「わたし」などを使用し、友達に対してもタメ口で話すことが多いため、親しい相手に対してはフランクでオープンな態度を見せる。
                - 話し手になることが多く、分からない場所があったらそれを噛み砕いて説明し、相手に理解しやすく伝えることで、知識を共有する役割を担っている。
+               - 文頭には必ず「魔理沙:」とつけてください。
                - 自信に満ちた態度で話すことが多いが、時には柔軟な対応も見せることから、状況に応じて適切なコミュニケーションができる力を持っている。
             5. 最後に会話の内容を踏まえた「まとめ」を出してください。
             """
 
-            with st.spinner("二人が会議中..."):
+           with st.spinner("二人が会議中..."):
                 response = model.generate_content(prompt)
+                original_text = response.text
+
+                # 霊夢...で始まる行を見つけて、HTMLのタグで囲む処理
+                colored_text = re.sub(
+                    r"(霊夢.*)", 
+                    r'<span style="color:#FF2E63; font-weight:bold; font-size:1.1em;">\1</span>', 
+                    original_text
+                )
+
+                # 魔理沙の行を黄金色にする（太字＋濃い黄色）
+                colored_text = re.sub(
+                    r"(魔理沙.*)", 
+                    r'<span style="color:#DAA520; font-weight:bold; font-size:1.1em;">\1</span>', 
+                    colored_text
+                )
+
                 st.markdown("---")
-                st.markdown(response.text)
+                st.markdown(colored_text, unsafe_allow_html=True)
                 st.success("☕討論終了☕")
 
         except Exception as e:
