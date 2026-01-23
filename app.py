@@ -13,7 +13,7 @@ st.markdown("""
         margin-bottom: 20px;
     }
     </style>
-    <div class="title-text">🔴 ゆっくりAI討論メーカー ⭐️</div>
+    <div class="title-text">🎀 ゆっくりAI討論メーカー ⭐️</div>
     """, unsafe_allow_html=True)
 
 st.write("テーマと二人の立場を入れると、ゆっくりAI同士が勝手に議論します！")
